@@ -9,7 +9,7 @@ Initial bootstrap scripts for setting up a Kubernetes workshop environment.
 
 ## Windows
 - 	Ubuntu 26.04 virtual system 
-- - 	If you are using Windows 11, we recommend using WSL2.
+- - If you are using Windows 11, we recommend using WSL2.
 -	Internet access from within the Ubuntu environment.
 -	(installed by our script) Kind (Kubernetes in Docker) installed and operational within the Ubuntu environment.
 -	(installed by our script) Kubectl installed in your Ubuntu environment (https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/)
