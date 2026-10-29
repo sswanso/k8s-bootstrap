@@ -3,7 +3,7 @@
 ## Automated WSL Setup
 
 ### What does `Setup-WSL2-Windows11.ps1` do?
-This script automates the creation of a secure, proxy-aware Linux environment for the workshop without messing up your personal settings. It does this by executing four main tasks:
+This script automates the creation of a secure, proxy-aware Linux environment for the workshop without messing up your personal settings. It does this by executing these tasks:
 1. **Configures Proxy Passthrough (`.wslconfig`):** Ensures WSL2 automatically inherits your corporate proxy setting dynamically from Windows.
 2. **System Feature Verification:** Scans and enables the Windows hypervisor features (WSL Engine & Virtual Machine Platform).
 3. **Installs the Linux Environment:** Downloads the default stable Ubuntu package from Microsoft, registers it cleanly, and binds it to your isolated workshop workspace, `breaking-kubernetes`.
