@@ -19,7 +19,8 @@ This script automates the creation of a secure, proxy-aware Linux environment fo
    ```
 4. **Note on Rebooting:** If the virtual machine features were not previously enabled on your corporate laptop, the script will halt and prompt you to reboot. Save your work, restart your machine, reopen PowerShell as Administrator, and run the script one more time to complete the Ubuntu download.
 
-#### Security Policy Troubleshooting
+#### Troubleshooting
+##### Security Policy
 
 In case you get an error that says the setup script cannot be run because running scripts is disabled on this system, there are two things to do.
 First, try running the script with the execution policy bypass flag like this:
