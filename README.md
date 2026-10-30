@@ -28,7 +28,7 @@ Initial bootstrap scripts for setting up a Kubernetes workshop environment.
 - To verify, run these commands:
 - -  `sudo kubectl get nodes`: verify there is nothing that says NotReady
 - -  `sudo kubectl get pods -A`: verify everything is Running
-- -  `sudo kubectl run --image=nginx nginx; sudo kubectl get pods`: verify the nginx pod is Running
+- -  `sudo kubectl run --image=nginx nginx; sleep 10; sudo kubectl get pods`: verify the nginx pod is Running
 - After verification, you can delete the testing pod: `sudo kubectl delete pods nginx`
 
 ---
