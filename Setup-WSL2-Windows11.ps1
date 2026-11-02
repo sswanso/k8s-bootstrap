@@ -6,7 +6,8 @@
     1. Ensures %USERPROFILE%\.wslconfig exists and contains autoProxy=true.
     2. Deep checks Windows Optional Features for WSL & Virtual Machine Platform.
     3. Handles the required Windows reboot cleanly.
-    4. Downloads and registers the Ubuntu distribution as "breaking-kubernetes" without launching.
+    4. Updates WSL to the latest version via 'wsl --update'.
+    5. Downloads and registers the Ubuntu distribution as "breaking-kubernetes" without launching.
 #>
 
 # Ensure running in an elevated administrative PowerShell window
@@ -24,7 +25,7 @@ Write-Host "=========================================================" -Foregrou
 # Step 1: Check and Configure Global .wslconfig
 # ---------------------------------------------------------
 $wslConfigPath = Join-Path $env:USERPROFILE ".wslconfig"
-Write-Host "`n[1/4] Checking WSL Config File: $wslConfigPath" -ForegroundColor Yellow
+Write-Host "`n[1/5] Checking WSL Config File: $wslConfigPath" -ForegroundColor Yellow
 
 $requiredContent = @(
     "[wsl2]"
@@ -63,7 +64,7 @@ if (Test-Path -Path $wslConfigPath) {
 # ---------------------------------------------------------
 # Step 2: Deep Verification of WSL Windows Optional Features
 # ---------------------------------------------------------
-Write-Host "`n[2/4] Verifying WSL System Feature Installation Status..." -ForegroundColor Yellow
+Write-Host "`n[2/5] Verifying WSL System Feature Installation Status..." -ForegroundColor Yellow
 
 # Query true feature state from Windows Online servicing
 $wslFeature = Get-WindowsOptionalFeature -Online -FeatureName "Microsoft-Windows-Subsystem-Linux"
@@ -94,16 +95,35 @@ if ($wslEnabled -and $vmEnabled) {
 }
 
 # ---------------------------------------------------------
-# Step 3: Install & Name default Ubuntu as "breaking-kubernetes"
+# Step 3: Update WSL to the Latest Version
+# ---------------------------------------------------------
+Write-Host "`n[3/5] Updating WSL to the latest version..." -ForegroundColor Yellow
+
+try {
+    wsl --update
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[SUCCESS] WSL is up to date." -ForegroundColor Green
+    } else {
+        Write-Host "[WARN] 'wsl --update' exited with code $LASTEXITCODE. Continuing, but WSL may not be on the latest version." -ForegroundColor Yellow
+    }
+} catch {
+    Write-Host "[WARN] Failed to run 'wsl --update'. Continuing, but WSL may not be on the latest version." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------
+# Step 4: Install & Name default Ubuntu as "breaking-kubernetes"
 # ---------------------------------------------------------
 $distroName = "breaking-kubernetes"
-Write-Host "`n[3/4] Registering Distro: '$distroName'..." -ForegroundColor Yellow
+Write-Host "`n[4/5] Registering Distro: '$distroName'..." -ForegroundColor Yellow
 
-# Check if the custom distro already exists
-$existingDistros = wsl --list --quiet 2>$null
-if ($existingDistros -match $distroName) {
+# Check if the custom distro already exists.
+# Note: wsl.exe emits UTF-16 output, which can appear with interleaved null
+# characters when captured by PowerShell; strip them so the match is reliable.
+$existingDistros = @(wsl --list --quiet 2>$null | ForEach-Object { ($_ -replace "`0", "").Trim() } | Where-Object { $_ })
+if ($existingDistros -contains $distroName) {
     Write-Host "[WARN] Distro '$distroName' already exists on this machine!" -ForegroundColor Yellow
     Write-Host "[SUCCESS] Skipping install to preserve existing state. Use 'wsl -d $distroName' to access it." -ForegroundColor Green
+    Write-Host "[INFO] To remove it and start fresh, run 'wsl --unregister $distroName' and then run this script again." -ForegroundColor Cyan
 } else {
     Write-Host "[INFO] Downloading and installing default Ubuntu image under name '$distroName'..." -ForegroundColor Cyan
     
@@ -119,13 +139,23 @@ if ($existingDistros -match $distroName) {
 }
 
 # ---------------------------------------------------------
-# Step 4: Verification & Launch Commands
+# Step 5: Verification & Launch Commands
 # ---------------------------------------------------------
-Write-Host "`n[4/4] Final Environment Scan..." -ForegroundColor Yellow
+Write-Host "`n[5/5] Final Environment Scan..." -ForegroundColor Yellow
 wsl --list --verbose
 
 Write-Host "`n=========================================================" -ForegroundColor Green
 Write-Host "   Environment Registered!                               " -ForegroundColor Green
-Write-Host "To enter your isolated workshop container, run:          " -ForegroundColor Green
+Write-Host "To enter your isolated workshop container, run the       " -ForegroundColor Green
+Write-Host "following command in this PowerShell terminal:           " -ForegroundColor Green
 Write-Host "-->   wsl -d $distroName" -ForegroundColor Yellow
 Write-Host "=========================================================" -ForegroundColor Green
+
+# Pre-type the launch command at the prompt so the user only has to press Enter.
+try {
+    $wshell = New-Object -ComObject WScript.Shell
+    $wshell.SendKeys("wsl -d $distroName") | Out-Null
+    Write-Host "`n[INFO] The command has been typed at your prompt below - just press Enter to launch!" -ForegroundColor Cyan
+} catch {
+    Write-Host "`n[INFO] Copy and run the command above to launch your environment." -ForegroundColor Cyan
+}

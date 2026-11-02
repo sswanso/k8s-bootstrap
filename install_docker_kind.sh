@@ -166,5 +166,6 @@ else
 fi
 
 echo -e "\n${GREEN}🎉 Verification, Installation, and Pull tests completed successfully using native Ubuntu packages!${NC}"
-echo -e "${INFO}You are ready to manage your Kubernetes cluster! Try: kind create cluster${NC}"
+echo -e "${INFO}You are ready to manage your Kubernetes cluster! Try:${NC}"
+echo -e "${INFO}  sudo --preserve-env=http_proxy,https_proxy,no_proxy kind create cluster${NC}"
 
